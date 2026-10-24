@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Lilium Orientalis — 3D Botanical Experience</title>
+  <meta name="description" content="Cinematic 3D parametric botanical animation of a blooming Oriental Lily bouquet.">
+  <meta name="theme-color" content="#07080b">
+
+  <!-- Google Fonts: Modern Tech Sans + Monospace -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="style.css?v=2">
+
+  <!-- Three.js Import Map -->
+  <script type="importmap">
+    {
+      "imports": {
+        "three": "./node_modules/three/build/three.module.js",
+        "three/addons/": "./node_modules/three/examples/jsm/"
+      }
+    }
+  </script>
+</head>
+<body class="theme-dark">
+  <div id="app-root" class="app-root">
+    
+    <!-- Full-Window 3D WebGL Canvas Layer -->
+    <canvas id="webgl-canvas" class="webgl-canvas"></canvas>
+
+    <!-- Top Timeline Progress Line (Attached to top of screen) -->
+    <div id="top-progress-bar" class="top-progress-bar" title="Timeline — click or drag to scrub">
+      <div id="top-progress-fill" class="top-progress-fill"></div>
+    </div>
+
+    <!-- Expandable Floating Glassmorphic Control Dock (Default: Closed) -->
+    <aside id="control-dock" class="control-dock collapsed" aria-label="Botanical Controls">
+      
+      <!-- Dock Toggle Header Button -->
+      <button id="dock-toggle-btn" class="dock-toggle-btn" aria-expanded="false" aria-label="Toggle Options">
+        <div class="dock-toggle-title">
+          <svg class="dock-toggle-icon" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
+          </svg>
+          <span class="dock-toggle-text">Options</span>
+        </div>
+        <div class="dock-chevron-wrap">
+          <svg class="dock-chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        </div>
+      </button>
+
+      <!-- Expandable Content Wrapper -->
+      <div id="dock-expandable-content" class="dock-expandable-content">
+        <!-- Dock Tabs: Only Cultivar and Optics -->
+        <nav class="dock-tabs" aria-label="Control Sections">
+          <button class="dock-tab active" data-tab="cultivar" id="tab-btn-cultivar">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="m4.93 4.93 4.24 4.24M14.83 9.17l4.24-4.24M14.83 14.83l4.24 4.24M9.17 14.83l-4.24 4.24"/></svg>
+            <span>Cultivar</span>
+          </button>
+          <button class="dock-tab" data-tab="optics" id="tab-btn-optics">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            <span>Optics</span>
+          </button>
+        </nav>
+
+        <!-- Dock Content Panels -->
+        <div class="dock-panels">
+        
+        <!-- PANEL 1: CULTIVAR & BOTANICAL STYLING -->
+        <div class="dock-panel active" id="panel-cultivar">
+          
+          <!-- Cultivar Presets -->
+          <div class="control-section">
+            <label class="dock-label">ORIENTAL LILY CULTIVAR</label>
+            <div class="cultivar-grid">
+              <button class="cultivar-card active" data-cultivar="stargazer">
+                <div class="swatch swatch-stargazer"></div>
+                <div class="cultivar-info">
+                  <span class="cultivar-name">Stargazer</span>
+                  <span class="cultivar-desc">Crimson Heart &middot; Snow Rim</span>
+                </div>
+              </button>
+              <button class="cultivar-card" data-cultivar="casablanca">
+                <div class="swatch swatch-casablanca"></div>
+                <div class="cultivar-info">
+                  <span class="cultivar-name">Casablanca</span>
+                  <span class="cultivar-desc">Pristine Ivory &middot; Emerald Throat</span>
+                </div>
+              </button>
+              <button class="cultivar-card" data-cultivar="aurora">
+                <div class="swatch swatch-aurora"></div>
+                <div class="cultivar-info">
+                  <span class="cultivar-name">Sunset Aurora</span>
+                  <span class="cultivar-desc">Peach &middot; Apricot Honey</span>
+                </div>
+              </button>
+              <button class="cultivar-card" data-cultivar="black_beauty">
+                <div class="swatch swatch-blackbeauty"></div>
+                <div class="cultivar-info">
+                  <span class="cultivar-name">Black Beauty</span>
+                  <span class="cultivar-desc">Deep Burgundy &middot; Gold Dust</span>
+                </div>
+              </button>
+            </div>
+          </div>
+
+          <!-- Shading Modes -->
+          <div class="control-section">
+            <label class="dock-label">RENDER PASS MODE</label>
+            <div class="mode-select-grid">
+              <button class="mode-btn active" data-mode="realistic">🌸 Botanical Realism</button>
+              <button class="mode-btn" data-mode="blueprint">⚡ Neon Blueprint</button>
+              <button class="mode-btn" data-mode="subsurface">🔬 Subsurface X-Ray</button>
+              <button class="mode-btn" data-mode="golden">🌅 Golden Hour</button>
+            </div>
+          </div>
+
+          <!-- Botanical Micro-Details -->
+          <div class="control-section toggles-section">
+            <label class="toggle-row">
+              <span class="toggle-label">Morning Dew Drops</span>
+              <input type="checkbox" id="chk-dew-drops" checked class="custom-toggle">
+            </label>
+            <label class="toggle-row">
+              <span class="toggle-label">Raised 3D Papillae</span>
+              <input type="checkbox" id="chk-papillae" checked class="custom-toggle">
+            </label>
+            <label class="toggle-row">
+              <span class="toggle-label">Floating Golden Pollen Dust</span>
+              <input type="checkbox" id="chk-pollen" checked class="custom-toggle">
+            </label>
+            <label class="toggle-row">
+              <span class="toggle-label">Blueprint Wireframe Glow</span>
+              <input type="checkbox" id="chk-wire-glow" checked class="custom-toggle">
+            </label>
+          </div>
+
+        </div>
+
+        <!-- PANEL 2: OPTICS, LIGHT & CAMERA -->
+        <div class="dock-panel" id="panel-optics">
+          
+          <!-- Camera Preset Angles -->
+          <div class="control-section">
+            <label class="dock-label">CINEMATIC CAMERA ANGLES</label>
+            <div class="cam-preset-grid">
+              <button class="cam-btn active" data-cam="cinematic">🎥 Orbit Tour</button>
+              <button class="cam-btn" data-cam="hero">🌺 Hero Bloom</button>
+              <button class="cam-btn" data-cam="macro">🔍 Petal Macro</button>
+              <button class="cam-btn" data-cam="stamen">✨ Golden Anthers</button>
+              <button class="cam-btn" data-cam="crown">👑 Crown Spiral</button>
+              <button class="cam-btn" data-cam="free">🕹️ Free 3D Orbit</button>
+            </div>
+          </div>
+
+          <!-- Wind Turbulence Slider -->
+          <div class="slider-control">
+            <div class="slider-header">
+              <span class="dock-label">ORGANIC BREEZE & SWAY</span>
+              <span id="wind-val" class="slider-val">Medium</span>
+            </div>
+            <input type="range" id="slider-wind" min="0" max="2" step="0.1" value="1.0" class="custom-slider">
+          </div>
+
+          <!-- Bloom Intensity Slider -->
+          <div class="slider-control">
+            <div class="slider-header">
+              <span class="dock-label">ANAMORPHIC BLOOM GLOW</span>
+              <span id="bloom-val" class="slider-val">0.8&times;</span>
+            </div>
+            <input type="range" id="slider-bloom" min="0" max="3" step="0.1" value="0.8" class="custom-slider">
+          </div>
+
+          <!-- Subsurface Scattering (SSS) Strength -->
+          <div class="slider-control">
+            <div class="slider-header">
+              <span class="dock-label">TRANSLUCENT PETAL SSS</span>
+              <span id="sss-val" class="slider-val">1.0&times;</span>
+            </div>
+            <input type="range" id="slider-sss" min="0" max="2.5" step="0.1" value="1.0" class="custom-slider">
+          </div>
+
+        </div> <!-- end panel-optics -->
+
+      </div> <!-- end dock-panels -->
+
+    </div> <!-- end dock-expandable-content -->
+
+    </aside>
+
+  </div>
+
+  <!-- Main Application Logic -->
+  <script type="module" src="app.js?v=2"></script>
+</body>
+</html>

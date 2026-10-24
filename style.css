@@ -1,0 +1,512 @@
+/* ==========================================================================
+   LILIUM ORIENTALIS — MINIMAL LUXURY BOTANICAL DESIGN SYSTEM
+   ========================================================================== */
+
+:root {
+  --bg-core: #07080b;
+  --bg-surface: rgba(13, 16, 23, 0.75);
+  --bg-surface-hover: rgba(22, 26, 38, 0.88);
+  
+  --border-subtle: rgba(255, 255, 255, 0.09);
+  --border-gold: rgba(245, 194, 107, 0.35);
+  --border-rose: rgba(232, 35, 97, 0.40);
+  
+  --text-primary: #f5f6f9;
+  --text-secondary: #9da6b8;
+  --text-muted: #646f84;
+  
+  --accent-gold: #f5c26b;
+  --accent-crimson: #e82361;
+  --accent-rose: #f06292;
+  --accent-emerald: #3ddc84;
+  --accent-cyan: #38bdf8;
+  
+  --font-sans: 'Outfit', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-pill: 9999px;
+  
+  --shadow-dock: 0 20px 48px -10px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --shadow-bar: 0 16px 36px -8px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.08);
+  
+  --transition-fast: 0.18s cubic-bezier(0.2, 0, 0, 1);
+  --transition-smooth: 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background-color: var(--bg-core);
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  user-select: none;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 100% Full-Window Container */
+.app-root {
+  position: relative;
+  width: 100vw;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+}
+
+/* Full-Screen WebGL Canvas */
+.webgl-canvas {
+  position: absolute;
+  inset: 0;
+  width: 100vw !important;
+  height: 100vh !important;
+  display: block;
+  outline: none;
+  z-index: 1;
+}
+
+/* ==========================================================================
+   TOP TIMELINE PROGRESS LINE (Attached to top of screen)
+   ========================================================================== */
+.top-progress-bar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.08);
+  z-index: 50;
+  cursor: pointer;
+  transition: height var(--transition-fast), background var(--transition-fast);
+}
+
+/* Extended invisible hover hit-area for effortless scrubbing */
+.top-progress-bar::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 16px;
+  pointer-events: auto;
+}
+
+.top-progress-bar:hover {
+  height: 6px;
+  background: rgba(255, 255, 255, 0.16);
+}
+
+.top-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #e82361 0%, #f5c26b 50%, #38bdf8 100%);
+  box-shadow: 0 0 10px rgba(245, 194, 107, 0.7), 0 0 20px rgba(232, 35, 97, 0.5);
+  position: relative;
+  will-change: width;
+  transition: width 0.05s linear;
+}
+
+.top-progress-fill::after {
+  content: '';
+  position: absolute;
+  right: -4px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ffffff;
+  box-shadow: 0 0 8px #ffffff, 0 0 14px var(--accent-gold);
+  opacity: 0;
+  transition: opacity var(--transition-fast);
+}
+
+.top-progress-bar:hover .top-progress-fill::after {
+  opacity: 1;
+}
+
+/* ==========================================================================
+   EXPANDABLE GLASSMORPHIC CONTROL DOCK (DEFAULT: CLOSED)
+   ========================================================================== */
+.control-dock {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  width: 350px;
+  max-height: calc(100vh - 48px);
+  background: var(--bg-surface);
+  backdrop-filter: blur(28px);
+  -webkit-backdrop-filter: blur(28px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-dock);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  z-index: 30;
+  transition: width 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              border-radius 0.35s cubic-bezier(0.16, 1, 0.3, 1),
+              box-shadow 0.3s ease,
+              background 0.3s ease;
+}
+
+/* Collapsed State: Sleek Minimal Pill */
+.control-dock.collapsed {
+  width: 124px;
+  height: 42px;
+  max-height: 42px;
+  border-radius: var(--radius-pill);
+  box-shadow: 0 10px 28px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.08);
+}
+
+.control-dock.collapsed:hover {
+  border-color: rgba(245, 194, 107, 0.35);
+  background: rgba(18, 22, 32, 0.88);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.7), 0 0 16px rgba(245, 194, 107, 0.15);
+}
+
+/* Toggle Header Button */
+.dock-toggle-btn {
+  width: 100%;
+  height: 42px;
+  padding: 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  border: none;
+  color: var(--text-primary);
+  font-family: var(--font-sans);
+  cursor: pointer;
+  outline: none;
+  flex-shrink: 0;
+  transition: background var(--transition-fast);
+}
+
+.dock-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.control-dock:not(.collapsed) .dock-toggle-btn {
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.32);
+}
+
+.dock-toggle-title {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+}
+
+.dock-toggle-icon {
+  color: var(--accent-gold);
+}
+
+.dock-chevron-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text-secondary);
+  transition: transform 0.32s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Chevron points up when collapsed (ready to expand), flips down when open */
+.control-dock.collapsed .dock-chevron-wrap {
+  transform: rotate(0deg);
+}
+
+.control-dock:not(.collapsed) .dock-chevron-wrap {
+  transform: rotate(180deg);
+}
+
+/* Expandable Content Container */
+.dock-expandable-content {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  opacity: 1;
+  max-height: 800px;
+  transition: opacity 0.28s ease, max-height 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.control-dock.collapsed .dock-expandable-content {
+  display: none;
+  max-height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* 2 Tabs: Cultivar & Optics */
+.dock-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(0, 0, 0, 0.28);
+}
+
+.dock-tab {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px 10px;
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  font-family: var(--font-sans);
+  font-size: 13px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all var(--transition-fast);
+  border-bottom: 2px solid transparent;
+}
+
+.dock-tab:hover {
+  color: var(--text-primary);
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.dock-tab.active {
+  color: var(--accent-gold);
+  border-bottom-color: var(--accent-gold);
+  background: rgba(245, 194, 107, 0.05);
+}
+
+.dock-panels {
+  padding: 18px;
+  overflow-y: auto;
+  max-height: calc(100vh - 120px);
+}
+
+.dock-panel {
+  display: none;
+  flex-direction: column;
+  gap: 18px;
+}
+
+.dock-panel.active {
+  display: flex;
+}
+
+/* Labels */
+.dock-label {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  font-weight: 500;
+  letter-spacing: 0.06em;
+  color: var(--text-muted);
+}
+
+/* Section Container */
+.control-section {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Cultivar Cards */
+.cultivar-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.cultivar-card {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.cultivar-card:hover {
+  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.20);
+}
+
+.cultivar-card.active {
+  background: rgba(245, 194, 107, 0.08);
+  border-color: var(--accent-gold);
+}
+
+.swatch {
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5);
+}
+
+.swatch-stargazer {
+  background: radial-gradient(circle, #bc1550 40%, #ff8da1 70%, #ffffff 100%);
+}
+
+.swatch-casablanca {
+  background: radial-gradient(circle, #4ba01e 30%, #f5faf0 75%, #ffffff 100%);
+}
+
+.swatch-aurora {
+  background: radial-gradient(circle, #e65100 30%, #ffb74d 70%, #fff3e0 100%);
+}
+
+.swatch-blackbeauty {
+  background: radial-gradient(circle, #3e0413 45%, #750b28 80%, #f5b025 100%);
+}
+
+.cultivar-info {
+  display: flex;
+  flex-direction: column;
+}
+
+.cultivar-name {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.cultivar-desc {
+  font-size: 10px;
+  color: var(--text-muted);
+}
+
+/* Render Mode Grid */
+.mode-select-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.mode-btn {
+  padding: 8px 10px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 11px;
+  font-family: var(--font-sans);
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.mode-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+}
+
+.mode-btn.active {
+  background: rgba(232, 35, 97, 0.12);
+  border-color: var(--accent-rose);
+  color: #fff;
+}
+
+/* Micro Details Toggles */
+.toggles-section {
+  background: rgba(0, 0, 0, 0.25);
+  padding: 12px;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border-subtle);
+}
+
+.toggle-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12px;
+  color: var(--text-secondary);
+  cursor: pointer;
+  padding: 5px 0;
+}
+
+.custom-toggle {
+  accent-color: var(--accent-gold);
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+}
+
+/* Camera Grid */
+.cam-preset-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.cam-btn {
+  padding: 9px 12px;
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+  transition: all var(--transition-fast);
+}
+
+.cam-btn:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.cam-btn.active {
+  background: rgba(245, 194, 107, 0.12);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+}
+
+/* Sliders */
+.slider-control {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.slider-val {
+  font-family: var(--font-mono);
+  font-size: 11px;
+  color: var(--accent-gold);
+}
+
+.hidden {
+  display: none !important;
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN
+   ========================================================================== */
+@media (max-width: 768px) {
+  .control-dock {
+    width: calc(100vw - 28px);
+    right: 14px;
+    bottom: 14px;
+    max-height: 52vh;
+  }
+  .control-dock.collapsed {
+    width: 120px;
+    max-height: 42px;
+  }
+}
