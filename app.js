@@ -949,31 +949,38 @@ function animate() {
     pollenParticles.geometry.attributes.position.needsUpdate = true;
   }
 
-  // Camera Choreography
+  // Camera Choreography with Mobile Responsive Framing
+  const aspect = camera.aspect || (window.innerWidth / window.innerHeight);
+  const isPortrait = aspect < 1.0;
+  // Responsive distance multiplier on mobile screens to ensure full bouquet visibility
+  const mobileDistMultiplier = isPortrait ? 1.0 + (1.0 - aspect) * 0.52 : 1.0;
+  // Center bouquet vertically with breathing room on mobile
+  const mobileYOffset = isPortrait ? 0.20 : 0.0;
+
   if (activeCamMode === 'cinematic') {
     const pAll = currentTime / DURATION;
     const sP = pAll * pAll * (3.0 - 2.0 * pAll);
     const azimuth = -0.32 + 0.62 * sP + 0.18 * Math.sin(Math.max(0, (pAll - 0.7) / 0.3) * Math.PI);
     const elevation = 0.08 + 0.10 * Math.sin(pAll * Math.PI);
-    const dist = 5.2 - 0.35 * Math.sin(pAll * Math.PI * 0.8);
-    const yTarget = -0.35 * (1.0 - sP) + 0.25 * sP;
+    const dist = (5.2 - 0.35 * Math.sin(pAll * Math.PI * 0.8)) * mobileDistMultiplier;
+    const yTarget = (-0.35 * (1.0 - sP) + 0.25 * sP) + mobileYOffset;
 
     camera.position.x = dist * Math.sin(azimuth) * Math.cos(elevation);
     camera.position.y = yTarget + dist * Math.sin(elevation);
     camera.position.z = dist * Math.cos(azimuth) * Math.cos(elevation);
     controls.target.set(0, yTarget, 0);
   } else if (activeCamMode === 'hero') {
-    camera.position.lerp(new THREE.Vector3(0.8, 0.35, 2.8), 0.05);
-    controls.target.lerp(new THREE.Vector3(0.27, 0.26, 0.30), 0.05);
+    camera.position.lerp(new THREE.Vector3(0.8 * mobileDistMultiplier, 0.35 + mobileYOffset, 2.8 * mobileDistMultiplier), 0.05);
+    controls.target.lerp(new THREE.Vector3(0.27, 0.26 + mobileYOffset, 0.30), 0.05);
   } else if (activeCamMode === 'macro') {
-    camera.position.lerp(new THREE.Vector3(0.38, 0.32, 1.45), 0.05);
-    controls.target.lerp(new THREE.Vector3(0.25, 0.25, 0.30), 0.05);
+    camera.position.lerp(new THREE.Vector3(0.38, 0.32 + mobileYOffset, 1.45), 0.05);
+    controls.target.lerp(new THREE.Vector3(0.25, 0.25 + mobileYOffset, 0.30), 0.05);
   } else if (activeCamMode === 'stamen') {
-    camera.position.lerp(new THREE.Vector3(0.18, 0.75, 1.55), 0.05);
-    controls.target.lerp(new THREE.Vector3(0.27, 0.55, 0.30), 0.05);
+    camera.position.lerp(new THREE.Vector3(0.18, 0.75 + mobileYOffset, 1.55), 0.05);
+    controls.target.lerp(new THREE.Vector3(0.27, 0.55 + mobileYOffset, 0.30), 0.05);
   } else if (activeCamMode === 'crown') {
-    camera.position.lerp(new THREE.Vector3(0.0, 3.8, 0.2), 0.05);
-    controls.target.lerp(new THREE.Vector3(0, 0.5, 0), 0.05);
+    camera.position.lerp(new THREE.Vector3(0.0, 3.8 * mobileDistMultiplier, 0.2), 0.05);
+    controls.target.lerp(new THREE.Vector3(0, 0.5 + mobileYOffset, 0), 0.05);
   }
 
   controls.update();
@@ -986,11 +993,19 @@ requestAnimationFrame(animate);
 // UI EVENT LISTENERS
 // ============================================================================
 
-// Resize handling (Full 100% Window Fit)
+// Resize handling (Full 100% Window Fit & Mobile Framing)
 function handleResize() {
   const w = window.innerWidth;
   const h = window.innerHeight;
-  camera.aspect = w / h;
+  const aspect = w / h;
+  camera.aspect = aspect;
+
+  // Adapt FOV on portrait/mobile so that all flowers are completely visible with padding
+  if (aspect < 1.0) {
+    camera.fov = 38 + (1.0 - Math.min(1.0, aspect)) * 16;
+  } else {
+    camera.fov = 38;
+  }
   camera.updateProjectionMatrix();
   renderer.setSize(w, h);
   composer.setSize(w, h);
